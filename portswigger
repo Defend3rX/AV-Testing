@@ -1,0 +1,181 @@
+PORTSWIGGER WEB SECURITY ACADEMY
+MEGA CHEAT SHEET - PENTEST WEB
+Uso: laboratorios/CTF autorizados
+
+1. SQL INJECTION
+' -> Comprueba si una comilla rompe una cadena SQL.
+" -> Variante para consultas con comillas dobles.
+OR -> Permite introducir una condicion logica.
+1=1 -> Condicion siempre verdadera.
+1=2 -> Condicion siempre falsa.
+ORDER BY 1 / 2 / 3 -> Determina el numero de columnas.
+UNION SELECT -> Comprueba si se pueden combinar consultas.
+NULL -> Valor util al probar compatibilidad entre columnas.
+@@version -> Version del motor SQL en motores compatibles.
+DATABASE() -> Base de datos actual en motores compatibles.
+information_schema -> Metadatos de bases de datos, tablas y columnas.
+
+Flujo: ' -> detectar -> verdadera/falsa -> ORDER BY -> UNION -> columnas -> BD -> tablas -> columnas -> datos
+
+2. XSS
+<script>alert(1)</script> -> PoC basica de ejecucion JavaScript.
+<img src=x onerror=alert(1)> -> Prueba mediante event handler.
+"><script>alert(1)</script> -> Prueba escapar de un atributo HTML.
+Reflected -> aparece inmediatamente en la respuesta.
+Stored -> queda almacenado.
+DOM -> JavaScript del navegador modifica el DOM de forma insegura.
+
+3. DOM XSS
+Fuentes: location.search, location.hash, location.href, document.referrer
+Sinks: innerHTML, outerHTML, document.write(), eval(), setTimeout(), setInterval()
+Concepto: entrada controlada -> JavaScript -> sink peligroso.
+
+4. AUTHENTICATION
+Probar: usuario valido + password incorrecta; usuario incorrecto + password valida;
+campos vacios; mayusculas/minusculas; espacios; password reset; cambio de password;
+sesiones tras logout; MFA.
+Buscar: diferencias de mensajes/tiempo, falta de rate limiting, reset predecible.
+
+5. ACCESS CONTROL / IDOR
+Ejemplo conceptual: /user/100 -> /user/101
+-> Comprobar si cambiar un identificador permite acceder a otro objeto.
+Tambien comparar metodos y rutas protegidas.
+Pregunta: ¿el servidor verifica autorizacion?
+
+6. PATH TRAVERSAL
+../
+../../
+../../../
+-> Comprueba si se puede salir del directorio permitido.
+Parametros: file= filename= path= document= download=
+
+7. COMMAND INJECTION
+Caracteres: ;  &&  ||  |
+-> Estudian si la entrada se concatena con comandos del sistema.
+Usar comandos inocuos en labs.
+
+8. SSTI
+{{7*7}} -> Si aparece 49 puede indicar evaluacion de plantilla.
+Otras sintaxis: ${7*7}, <%= 7*7 %>, #{7*7}
+La sintaxis depende del template engine.
+
+9. SSRF
+Parametros: url= uri= path= dest= redirect= callback= webhook= image= feed=
+Concepto: entrada -> servidor -> peticion a otra ubicacion.
+Buscar recursos internos y diferencias de validacion.
+
+10. XXE
+Buscar funciones que acepten XML, SOAP, feeds o documentos XML.
+Concepto: XML -> parser -> ¿acepta entidades externas?
+
+11. FILE UPLOAD
+Comprobar extension, Content-Type, contenido, nombre, tamaño, almacenamiento,
+renombrado y procesamiento posterior.
+Pregunta: ¿el servidor valida realmente el archivo?
+
+12. CSRF
+Buscar operaciones de cambio de estado: cambio de email/password, settings,
+transferencias.
+Comprobar CSRF token, SameSite, Origin y Referer.
+Pregunta: ¿otro sitio puede provocar la accion usando la sesion?
+
+13. CORS
+Headers: Origin, Access-Control-Allow-Origin, Access-Control-Allow-Credentials
+Buscar origins demasiado permisivos o reflejados.
+
+14. JWT
+Inspeccionar Header, Payload y Signature.
+Claims: sub, user, role, admin, exp, iat.
+Comprobar firma, algoritmo, expiracion, claims e invalidacion.
+
+15. OAUTH
+Parametros: client_id, redirect_uri, response_type, scope, state, code.
+Comprobar redirect_uri, state, authorization code y vinculacion de cuenta.
+
+16. HOST HEADER INJECTION
+Header: Host:
+Observar si se usa para URLs, redirects, password reset, routing o contenido.
+
+17. HTTP REQUEST SMUGGLING
+Conceptos: Content-Length y Transfer-Encoding.
+Buscar diferencias de interpretacion entre proxy/frontend y backend.
+
+18. WEB CACHE POISONING
+Buscar entradas que afecten cache key, response, headers, Host o URL.
+Concepto: request manipulada -> cache -> respuesta manipulada almacenada.
+
+19. WEB CACHE DECEPTION
+Concepto: contenido privado -> URL aparentemente estatica -> cache.
+Pregunta: ¿contenido privado queda almacenado como cacheable?
+
+20. BUSINESS LOGIC
+Probar en labs: cantidad 0, negativa, muy grande, repetir operacion,
+saltar pasos, cambiar orden, usar funciones fuera del flujo.
+Pregunta: ¿el servidor confia en el flujo del cliente?
+
+21. RACE CONDITIONS
+Buscar cupones, saldo, transferencias, reset, compras, canjes y limites.
+Concepto: requests simultaneas -> estado inconsistente.
+
+22. WEBSOCKETS
+Buscar ws:// y wss://.
+Comprobar autenticacion, autorizacion, mensajes, XSS, parametros y Origin.
+
+23. GRAPHQL
+Buscar /graphql.
+Conceptos: query, mutation, subscription, introspection.
+Comprobar autorizacion, campos expuestos, introspection, profundidad y rate limiting.
+
+24. NOSQL INJECTION
+Buscar en JSON, MongoDB, APIs, login, search y filtros.
+Concepto: entrada -> operador NoSQL -> cambia el significado de la consulta.
+
+25. PROTOTYPE POLLUTION
+Propiedades: __proto__, constructor, prototype.
+Concepto: input -> objeto JavaScript -> prototype.
+
+26. INSECURE DESERIALIZATION
+Buscar cookies, Base64, objetos serializados y session data.
+Señales posibles: rO0AB, O:, a:
+Depende del lenguaje/framework.
+
+27. API TESTING
+Buscar /api/, /v1/, /v2/, /graphql, /swagger, /openapi.
+Metodos: GET, POST, PUT, PATCH, DELETE.
+Comprobar authentication, authorization, mass assignment, rate limiting,
+excessive data exposure e IDOR.
+
+28. HTTP METHOD TAMPERING
+Comparar GET, POST, PUT, PATCH y DELETE en funcionalidades protegidas.
+Pregunta: ¿el control de acceso depende incorrectamente del metodo?
+
+29. PARAMETER POLLUTION
+Ejemplo: ?id=1&id=2
+-> Estudia como frontend, proxy y backend interpretan parametros duplicados.
+
+30. INFORMATION DISCLOSURE
+Buscar /debug, /.git, robots.txt, sitemap.xml, backup, old, test, error,
+stack trace, comentarios HTML, JavaScript, source maps, headers y cookies.
+
+31. METODOLOGIA BURP
+1. Recon: identificar funcionalidades y parametros.
+2. Intercept: capturar la peticion.
+3. HTTP History: establecer baseline.
+4. Repeater: modificar una copia.
+5. Cambiar una sola cosa.
+6. Comparar status, tamaño, headers, contenido y tiempos.
+7. Formular hipotesis.
+8. Confirmar con una prueba controlada.
+9. Medir impacto.
+10. Documentar request, response, evidencia, impacto y mitigacion.
+
+32. REGLA DE ORO
+No memorices solo payloads.
+Pregunta siempre:
+¿Donde esta la entrada?
+¿Quien la procesa?
+¿En que contexto termina?
+¿Que interpretacion hace el servidor/navegador?
+¿Puedo modificar esa interpretacion?
+¿Como lo demuestro de forma segura?
+¿Cual es el impacto?
